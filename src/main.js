@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { Boat } from './boat.js?v=20261009171854';
-import { buildWorld, LAYOUT } from './world.js?v=20261009171854';
-import { Wake, FoilSpray, WindStreaks } from './effects.js?v=20261009171854';
-import { Walker } from './walker.js?v=20261009171854';
-import { Rib } from './rib.js?v=20261009171854';
-import { applyDayNight, currentHour } from './daynight.js?v=20261009171854';
-import { STEPS, TEAM } from './cafe.js?v=20261009171854';
-import { renderGeoMap, renderRegattaMap } from './geomap.js?v=20261009171854';
-import { DataStream, Recorder, TelemetryPanel } from './telemetry.js?v=20261009171854';
-import { PROFILE, EXPERIENCES, EDUCATION, INTERESTS, LANGUAGES, CONCEPTS, WORKS, REGATTAS, SKILLS } from './cv.js?v=20261009171854';
-import { Race, COURSE } from './race.js?v=20261009171854';
-import { StaticMerger } from './optimize.js?v=20261009171854';
-import { solid, WIND } from './toon.js?v=20261009171854';
+import { Boat } from './boat.js?v=20261012085106';
+import { buildWorld, LAYOUT } from './world.js?v=20261012085106';
+import { Wake, FoilSpray, WindStreaks } from './effects.js?v=20261012085106';
+import { Walker } from './walker.js?v=20261012085106';
+import { Rib } from './rib.js?v=20261012085106';
+import { applyDayNight, currentHour } from './daynight.js?v=20261012085106';
+import { STEPS, TEAM } from './cafe.js?v=20261012085106';
+import { renderGeoMap, renderRegattaMap } from './geomap.js?v=20261012085106';
+import { DataStream, Recorder, TelemetryPanel } from './telemetry.js?v=20261012085106';
+import { PROFILE, EXPERIENCES, EDUCATION, INTERESTS, LANGUAGES, CONCEPTS, WORKS, REGATTAS, SKILLS } from './cv.js?v=20261012085106';
+import { Race, COURSE } from './race.js?v=20261012085106';
+import { StaticMerger } from './optimize.js?v=20261012085106';
+import { solid, WIND } from './toon.js?v=20261012085106';
 
 const $ = (s) => document.querySelector(s);
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
@@ -166,12 +166,21 @@ const joy = { x: 0, y: 0, active: false };
   el.addEventListener('pointerdown', (e) => {
     const r = el.getBoundingClientRect();
     origin.R = r.width / 2; origin.x = r.left + origin.R; origin.y = r.top + origin.R;
+    // Tant qu'on le tient, il est cloué à l'écran (même si une fiche s'ouvre et le recouvre) ;
+    // relâché, il retrouve sa place qui ne gêne pas la lecture.
+    Object.assign(el.style, { left: `${r.left}px`, top: `${r.top}px`, right: 'auto', bottom: 'auto' });
+    el.classList.add('held');
     joy.active = true; el.setPointerCapture(e.pointerId); move(e); e.preventDefault();
   });
   el.addEventListener('pointermove', (e) => joy.active && move(e));
-  const end = () => { joy.active = false; joy.x = joy.y = 0; knob.style.transform = ''; };
+  const end = () => {
+    joy.active = false; joy.x = joy.y = 0; knob.style.transform = '';
+    Object.assign(el.style, { left: '', top: '', right: '', bottom: '' });
+    el.classList.remove('held');
+  };
   el.addEventListener('pointerup', end);
   el.addEventListener('pointercancel', end);
+  el.addEventListener('lostpointercapture', end);
 }
 function readWalkInput() {
   const k = (...names) => names.some((n) => keys.has(n));

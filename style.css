@@ -754,6 +754,7 @@ canvas#scene.frozen { filter: grayscale(1) contrast(.92) brightness(1.06); }
   background: rgba(255, 253, 248, .55); border: 2.5px solid rgba(29, 37, 51, .55); box-shadow: 0 4px 0 rgba(29, 37, 51, .2); touch-action: none; backdrop-filter: blur(2px); }
 .joy[hidden] { display: none; }
 .joy-knob { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: var(--accent); border: 2.5px solid var(--ink); box-shadow: 0 3px 0 rgba(29, 37, 51, .3); pointer-events: none; }
+.joy.held { z-index: 60; }
 @media (pointer: coarse) and (max-height: 500px) { .joy { left: auto; right: 16px; bottom: 54px; width: 96px; height: 96px; } }
 
 /* Indice d'arrivée : « maintiens ici », un rond qui pulse posé sur l'eau. */
