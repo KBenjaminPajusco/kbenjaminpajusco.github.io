@@ -1,19 +1,32 @@
 import * as THREE from 'three';
-import { Boat } from './boat.js?v=20261012085106';
-import { buildWorld, LAYOUT } from './world.js?v=20261012085106';
-import { Wake, FoilSpray, WindStreaks } from './effects.js?v=20261012085106';
-import { Walker } from './walker.js?v=20261012085106';
-import { Rib } from './rib.js?v=20261012085106';
-import { applyDayNight, currentHour } from './daynight.js?v=20261012085106';
-import { STEPS, TEAM } from './cafe.js?v=20261012085106';
-import { renderGeoMap, renderRegattaMap } from './geomap.js?v=20261012085106';
-import { DataStream, Recorder, TelemetryPanel } from './telemetry.js?v=20261012085106';
-import { PROFILE, EXPERIENCES, EDUCATION, INTERESTS, LANGUAGES, CONCEPTS, WORKS, REGATTAS, SKILLS } from './cv.js?v=20261012085106';
-import { Race, COURSE } from './race.js?v=20261012085106';
-import { StaticMerger } from './optimize.js?v=20261012085106';
-import { solid, WIND } from './toon.js?v=20261012085106';
+import { Boat } from './boat.js?v=20261012134859';
+import { buildWorld, LAYOUT } from './world.js?v=20261012134859';
+import { Wake, FoilSpray, WindStreaks } from './effects.js?v=20261012134859';
+import { Walker } from './walker.js?v=20261012134859';
+import { Rib } from './rib.js?v=20261012134859';
+import { applyDayNight, currentHour } from './daynight.js?v=20261012134859';
+import { STEPS, TEAM } from './cafe.js?v=20261012134859';
+import { renderGeoMap, renderRegattaMap } from './geomap.js?v=20261012134859';
+import { DataStream, Recorder, TelemetryPanel } from './telemetry.js?v=20261012134859';
+import { PROFILE, EXPERIENCES, EDUCATION, INTERESTS, LANGUAGES, CONCEPTS, WORKS, REGATTAS, SKILLS } from './cv.js?v=20261012134859';
+import { Race, COURSE } from './race.js?v=20261012134859';
+import { StaticMerger } from './optimize.js?v=20261012134859';
+import { solid, WIND } from './toon.js?v=20261012134859';
 
 const $ = (s) => document.querySelector(s);
+// Statistiques (GoatCounter, sans cookie) : ce que les visiteurs font dans le monde, une fois par visite.
+const tracked = new Set();
+function track(name, title = name) {
+  if (tracked.has(name)) return;
+  tracked.add(name);
+  try { window.goatcounter?.count?.({ path: `evt/${name}`, title, event: true }); } catch { /* bloqueur de pub */ }
+}
+document.addEventListener('click', (e) => {
+  const a = e.target.closest?.('a[href]');
+  if (!a) return;
+  if (a.href.includes('linkedin.com')) track('lien/linkedin', 'Lien LinkedIn');
+  else if (a.href.startsWith('mailto:')) track('lien/email', 'Lien email');
+}, true);
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 
 // --- Rendu
@@ -231,6 +244,7 @@ function setAction(label) {
 }
 function disembark(spot) {
   mode = 'walk';
+  track('debarque', 'Débarqué à pied');
   walker.place(spot.x, spot.y, world);
   walker.heading = Math.atan2(spot.x - boat.pos.x, spot.y - boat.pos.y);
   walker.root.visible = true;
@@ -469,12 +483,14 @@ function countPullups(n) {
 }
 card.querySelector('.pullup-btn').addEventListener('click', () => {
   if (mode !== 'walk') return;
+  track('traction', 'Traction faite');
   const z = world.zones.find((q) => q.id === 'gym');
   walker.startPull({ x: z.x + z.bar.dx, z: z.z + z.bar.dz, y: z.bar.y });
 });
 
 function renderCard(z) {
   const c = z.card;
+  track(`lieu/${z.id}`, `Fiche : ${c.title || z.id}`);
   card.style.setProperty('--card-accent', c.accent || '#ff6a4d');
   const logo = card.querySelector('.logo');
   logo.hidden = !c.brand;
@@ -863,6 +879,7 @@ raceBtn.addEventListener('click', () => {
     return;
   }
   if (!race.join(boat)) showToast('Course en cours : attends la prochaine.', 'warn');
+  else track('regate/depart', 'Régate lancée');
 });
 function showToast(text, kind = 'info') {
   toast.textContent = text;
@@ -886,6 +903,7 @@ reportEl.addEventListener('click', (e) => { if (e.target === reportEl) reportEl.
 function openReport() {
   const rep = race.report;
   if (!rep) return;
+  track('regate/arrivee', 'Régate terminée');
   const me = rep.rows.find((r) => r.human);
   reportEl.querySelector('.rr-title').textContent = me ? `${me.rank}${me.rank === 1 ? 'er' : 'e'} sur ${rep.rows.length}${me.finished !== null ? ` en ${fmtTime(me.time)}` : ' · non classé'}` : 'Régate';
   reportEl.querySelector('.rr-sub').textContent = `Parcours au vent / sous le vent · vent du nord · ${rep.at.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
@@ -1019,6 +1037,7 @@ function start(choice = SAILOR_BY_DEFAULT ? 'sail' : 'rib') {
   if (started || cine.phase !== 'menu') return;
   cine = { phase: 'fly', t: 0 };
   closePicker();
+  track(`vehicule/${choice}`, choice === 'rib' ? 'Véhicule : semi-rigide' : 'Véhicule : foiler');
   if (choice === 'rib') {
     const rib = new Rib();
     rib.pos.copy(boat.pos);
@@ -1117,7 +1136,7 @@ $('#cv-body').innerHTML = `
   ${Object.values(INTERESTS).map((i) => `
     <div class="item"><div class="when">${esc(i.tags.join(' · '))}</div><div><b>${esc(i.title)}</b><p>${esc(i.body)}</p></div></div>`).join('')}
 `;
-function openCv() { $('#cv').hidden = false; }
+function openCv() { $('#cv').hidden = false; track('cv-classique', 'CV classique ouvert'); }
 function closeCv() { $('#cv').hidden = true; }
 document.querySelectorAll('[data-open-cv]').forEach((b) => b.addEventListener('click', openCv));
 document.querySelector('[data-close-cv]').addEventListener('click', closeCv);
