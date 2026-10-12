@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { Boat } from './boat.js?v=20261012135646';
-import { buildWorld, LAYOUT } from './world.js?v=20261012135646';
-import { Wake, FoilSpray, WindStreaks } from './effects.js?v=20261012135646';
-import { Walker } from './walker.js?v=20261012135646';
-import { Rib } from './rib.js?v=20261012135646';
-import { applyDayNight, currentHour } from './daynight.js?v=20261012135646';
-import { STEPS, TEAM } from './cafe.js?v=20261012135646';
-import { renderGeoMap, renderRegattaMap } from './geomap.js?v=20261012135646';
-import { DataStream, Recorder, TelemetryPanel } from './telemetry.js?v=20261012135646';
-import { PROFILE, EXPERIENCES, EDUCATION, INTERESTS, LANGUAGES, CONCEPTS, WORKS, REGATTAS, SKILLS } from './cv.js?v=20261012135646';
-import { Race, COURSE } from './race.js?v=20261012135646';
-import { StaticMerger } from './optimize.js?v=20261012135646';
-import { solid, WIND } from './toon.js?v=20261012135646';
+import { Boat } from './boat.js?v=20261012135827';
+import { buildWorld, LAYOUT } from './world.js?v=20261012135827';
+import { Wake, FoilSpray, WindStreaks } from './effects.js?v=20261012135827';
+import { Walker } from './walker.js?v=20261012135827';
+import { Rib } from './rib.js?v=20261012135827';
+import { applyDayNight, currentHour } from './daynight.js?v=20261012135827';
+import { STEPS, TEAM } from './cafe.js?v=20261012135827';
+import { renderGeoMap, renderRegattaMap } from './geomap.js?v=20261012135827';
+import { DataStream, Recorder, TelemetryPanel } from './telemetry.js?v=20261012135827';
+import { PROFILE, EXPERIENCES, EDUCATION, INTERESTS, LANGUAGES, CONCEPTS, WORKS, REGATTAS, SKILLS } from './cv.js?v=20261012135827';
+import { Race, COURSE } from './race.js?v=20261012135827';
+import { StaticMerger } from './optimize.js?v=20261012135827';
+import { solid, WIND } from './toon.js?v=20261012135827';
 
 const $ = (s) => document.querySelector(s);
 // Statistiques (GoatCounter, sans cookie) : ce que les visiteurs font dans le monde, une fois par visite.

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { solid, toon } from './toon.js?v=20261012135646';
-import { navLights } from './island.js?v=20261012135646';
+import { solid, toon } from './toon.js?v=20261012135827';
+import { navLights } from './island.js?v=20261012135827';
 
 // Petit match race en boucle à côté de la bouée « Sportif de haut niveau », pour le décor :
 // procédure de départ en tournant, louvoyage où les bateaux se croisent, bouée au vent, retour au portant.
@@ -74,7 +74,7 @@ export function buildMatchRace({ root, anim, labels, circles, map, committeeAt }
   };
   mark(pin, '#ff9f1c', 2.6);
   mark(windward, '#ff9f1c', 3.4);
-  circles.push({ x: committee[0], z: committee[1], r: 4 });
+  circles.push({ x: committee[0], z: committee[1], r: 4, soft: true }); // décor : on le traverse comme les bouées
 
   // Ligne de départ en pointillés.
   const dashMat = new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.75 });
