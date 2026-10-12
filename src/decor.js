@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { solid, rng } from './toon.js?v=20261012134859';
-import { keelboat } from './matchrace.js?v=20261012134859';
+import { solid, rng } from './toon.js?v=20261012135646';
+import { keelboat } from './matchrace.js?v=20261012135646';
 
 // Habillage du plan d'eau : balisage latéral (IALA A), cardinales, danger isolé, bateaux PNJ.
 
@@ -107,7 +107,7 @@ export function buildDecor({ root, anim, circles, chenal, skipSegments = [], avo
         m.position.set(x, 0, z);
         root.add(m);
         bob(anim, m, R() * 6);
-        circles.push({ x, z, r: 1.8 });
+        circles.push({ x, z, r: 1.8, soft: true });
       }
     }
   });
@@ -118,7 +118,7 @@ export function buildDecor({ root, anim, circles, chenal, skipSegments = [], avo
     m.position.set(c.x, 0, c.z);
     root.add(m);
     bob(anim, m, R() * 6);
-    circles.push({ x: c.x, z: c.z, r: 1.8 });
+    circles.push({ x: c.x, z: c.z, r: 1.8, soft: true });
   }
   for (const d of dangers) {
     const rock = solid(new THREE.IcosahedronGeometry(4, 0).scale(1, 0.45, 1), '#7d8792', { outlineWidth: 0.12 });
@@ -128,7 +128,7 @@ export function buildDecor({ root, anim, circles, chenal, skipSegments = [], avo
     m.position.set(d.x, 0, d.z);
     root.add(m);
     bob(anim, m, R() * 6);
-    circles.push({ x: d.x + 4, z: d.z + 2, r: 4 }, { x: d.x, z: d.z, r: 1.8 });
+    circles.push({ x: d.x + 4, z: d.z + 2, r: 4 }, { x: d.x, z: d.z, r: 1.8, soft: true }); // le rocher bloque, la balise se traverse
   }
 
   return { cruise: (boat, pts, lap, phase) => cruise(anim, root, boat, pts, lap, phase), fishingBoat, keelboat };

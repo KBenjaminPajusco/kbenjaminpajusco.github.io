@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { solid, toon } from './toon.js?v=20261012134859';
-import { navLights } from './island.js?v=20261012134859';
+import { solid, toon } from './toon.js?v=20261012135646';
+import { navLights } from './island.js?v=20261012135646';
 
 // Petit match race en boucle à côté de la bouée « Sportif de haut niveau », pour le décor :
 // procédure de départ en tournant, louvoyage où les bateaux se croisent, bouée au vent, retour au portant.
@@ -67,7 +67,7 @@ export function buildMatchRace({ root, anim, labels, circles, map, committeeAt }
     const m = solid(new THREE.CylinderGeometry(1.1, 1.3, h, 8).translate(0, h / 2 - 0.3, 0), col, { outlineWidth: 0.06 });
     m.position.set(p[0], 0, p[1]);
     root.add(m);
-    circles.push({ x: p[0], z: p[1], r: 1.8 });
+    circles.push({ x: p[0], z: p[1], r: 1.8, soft: true });
     map.marks.push({ x: p[0], z: p[1] });
     const ph = Math.random() * 6;
     anim.push((dt, t) => { m.position.y = Math.sin(t * 1.7 + ph) * 0.2; });

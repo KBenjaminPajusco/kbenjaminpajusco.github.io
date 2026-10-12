@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { Boat } from './boat.js?v=20261012134859';
-import { buildWorld, LAYOUT } from './world.js?v=20261012134859';
-import { Wake, FoilSpray, WindStreaks } from './effects.js?v=20261012134859';
-import { Walker } from './walker.js?v=20261012134859';
-import { Rib } from './rib.js?v=20261012134859';
-import { applyDayNight, currentHour } from './daynight.js?v=20261012134859';
-import { STEPS, TEAM } from './cafe.js?v=20261012134859';
-import { renderGeoMap, renderRegattaMap } from './geomap.js?v=20261012134859';
-import { DataStream, Recorder, TelemetryPanel } from './telemetry.js?v=20261012134859';
-import { PROFILE, EXPERIENCES, EDUCATION, INTERESTS, LANGUAGES, CONCEPTS, WORKS, REGATTAS, SKILLS } from './cv.js?v=20261012134859';
-import { Race, COURSE } from './race.js?v=20261012134859';
-import { StaticMerger } from './optimize.js?v=20261012134859';
-import { solid, WIND } from './toon.js?v=20261012134859';
+import { Boat } from './boat.js?v=20261012135646';
+import { buildWorld, LAYOUT } from './world.js?v=20261012135646';
+import { Wake, FoilSpray, WindStreaks } from './effects.js?v=20261012135646';
+import { Walker } from './walker.js?v=20261012135646';
+import { Rib } from './rib.js?v=20261012135646';
+import { applyDayNight, currentHour } from './daynight.js?v=20261012135646';
+import { STEPS, TEAM } from './cafe.js?v=20261012135646';
+import { renderGeoMap, renderRegattaMap } from './geomap.js?v=20261012135646';
+import { DataStream, Recorder, TelemetryPanel } from './telemetry.js?v=20261012135646';
+import { PROFILE, EXPERIENCES, EDUCATION, INTERESTS, LANGUAGES, CONCEPTS, WORKS, REGATTAS, SKILLS } from './cv.js?v=20261012135646';
+import { Race, COURSE } from './race.js?v=20261012135646';
+import { StaticMerger } from './optimize.js?v=20261012135646';
+import { solid, WIND } from './toon.js?v=20261012135646';
 
 const $ = (s) => document.querySelector(s);
 // Statistiques (GoatCounter, sans cookie) : ce que les visiteurs font dans le monde, une fois par visite.
@@ -847,6 +847,33 @@ function updateHold(dt, moving) {
   if (holdMoved > 3) { holdEl.classList.add('gone'); setTimeout(() => { holdEl.hidden = true; }, 500); }
 }
 // Téléportation en fondu : le bateau est posé dans l'eau au plus près du lieu, cap au nord.
+// Effet fantôme : en traversant une bouée, le bateau devient translucide un instant.
+// Chaque maillage reçoit une copie de son matériau (les originaux, parfois partagés, ne sont pas touchés).
+let ghostK = 0;
+const ghostMats = new WeakMap();
+function updateGhost(dt, inside) {
+  const k = ghostK + ((inside ? 1 : 0) - ghostK) * Math.min(1, dt * (inside ? 12 : 4));
+  if (Math.abs(k - ghostK) < 0.002 && k > 0.002) return;
+  if (k <= 0.002 && ghostK === 0) return;
+  ghostK = k <= 0.002 ? 0 : k;
+  boat.root.traverse((o) => {
+    if (!o.isMesh || Array.isArray(o.material)) return;
+    // Les contours (shader opaque) s'effacent d'un coup : un fantôme n'a pas de trait.
+    if (o.material.isShaderMaterial) { o.visible = ghostK < 0.15; return; }
+    let g = ghostMats.get(o);
+    if (!g) {
+      if (!ghostK) return;
+      const copy = o.material.clone();
+      copy.transparent = true;
+      copy.depthWrite = false;
+      g = { orig: o.material, copy };
+      ghostMats.set(o, g);
+    }
+    if (!ghostK) { o.material = g.orig; return; }
+    o.material = g.copy;
+    g.copy.opacity = (g.orig.opacity ?? 1) * (1 - 0.65 * ghostK);
+  });
+}
 function goTo(z) {
   closeMap();
   const fade = $('#fade');
@@ -1247,6 +1274,7 @@ function tick(dt) {
     frozen = started && touched && !!activeZone && !card.hidden && !input.any && !race.playerIn;
     if (!frozen) boat.update(dt, input, world.collide);
   }
+  updateGhost(dt, mode !== 'walk' && world.inSoft(boat.pos, boat.motor ? 3 : 4));
   if (mode === 'walk') frozen = false;
   const joyOn = IS_MOBILE && mode === 'walk' && started;
   if ($('#joy').hidden === joyOn) $('#joy').hidden = !joyOn;

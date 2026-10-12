@@ -1,17 +1,17 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { solid, toon, rng, PALETTE } from './toon.js?v=20261012134859';
-import { makeWater } from './effects.js?v=20261012134859';
-import { person } from './characters.js?v=20261012134859';
-import { buildCafe } from './cafe.js?v=20261012134859';
-import { buildMatchRace } from './matchrace.js?v=20261012134859';
-import { buildPhare } from './phare.js?v=20261012134859';
-import { Boat } from './boat.js?v=20261012134859';
-import { buildDecor } from './decor.js?v=20261012134859';
-import { buildTown } from './town.js?v=20261012134859';
-import { buildIsland, insidePoly, nearestOnPoly } from './island.js?v=20261012134859';
-import { buildIslandLife } from './islandlife.js?v=20261012134859';
-import { EXPERIENCES, EDUCATION, PLACES, INTERESTS, PROFILE, AI_FLOW } from './cv.js?v=20261012134859';
+import { solid, toon, rng, PALETTE } from './toon.js?v=20261012135646';
+import { makeWater } from './effects.js?v=20261012135646';
+import { person } from './characters.js?v=20261012135646';
+import { buildCafe } from './cafe.js?v=20261012135646';
+import { buildMatchRace } from './matchrace.js?v=20261012135646';
+import { buildPhare } from './phare.js?v=20261012135646';
+import { Boat } from './boat.js?v=20261012135646';
+import { buildDecor } from './decor.js?v=20261012135646';
+import { buildTown } from './town.js?v=20261012135646';
+import { buildIsland, insidePoly, nearestOnPoly } from './island.js?v=20261012135646';
+import { buildIslandLife } from './islandlife.js?v=20261012135646';
+import { EXPERIENCES, EDUCATION, PLACES, INTERESTS, PROFILE, AI_FLOW } from './cv.js?v=20261012135646';
 
 // Plan du monde (le vent vient du nord, -z) :
 //   départ + nom flottant au centre, chenal du parcours vers l'est,
@@ -1016,6 +1016,10 @@ export function buildWorld(scene) {
   const inPort = (p) => inside(regions.find((r) => r.id === 'port'), p);
 
   const BOUND = 560;
+  // Le bateau chevauche-t-il une bouée (qu'on traverse) ? Sert à l'effet fantôme.
+  function inSoft(pos, radius) {
+    return circles.some((c) => c.soft && Math.hypot(pos.x - c.x, pos.y - c.z) < c.r + radius);
+  }
   function collide(pos, radius) {
     let hit = false;
     for (const p of land.polys) {
@@ -1124,5 +1128,5 @@ export function buildWorld(scene) {
   }
 
   const addObstacle = (c) => circles.push(c);
-  return { berth: kcBerth, islandPoly: () => portIsland?.poly.pts, zones, labels, collide, update, map, bound: BOUND, groundY, walkable, landingSpot, cafe: cafeLoop, phare, regions, inRegion, inPort, water, addObstacle };
+  return { berth: kcBerth, islandPoly: () => portIsland?.poly.pts, zones, labels, collide, inSoft, update, map, bound: BOUND, groundY, walkable, landingSpot, cafe: cafeLoop, phare, regions, inRegion, inPort, water, addObstacle };
 }
