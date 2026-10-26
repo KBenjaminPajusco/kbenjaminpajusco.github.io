@@ -1,17 +1,19 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { solid, toon, rng, PALETTE } from './toon.js?v=20261012135827';
-import { makeWater } from './effects.js?v=20261012135827';
-import { person } from './characters.js?v=20261012135827';
-import { buildCafe } from './cafe.js?v=20261012135827';
-import { buildMatchRace } from './matchrace.js?v=20261012135827';
-import { buildPhare } from './phare.js?v=20261012135827';
-import { Boat } from './boat.js?v=20261012135827';
-import { buildDecor } from './decor.js?v=20261012135827';
-import { buildTown } from './town.js?v=20261012135827';
-import { buildIsland, insidePoly, nearestOnPoly } from './island.js?v=20261012135827';
-import { buildIslandLife } from './islandlife.js?v=20261012135827';
-import { EXPERIENCES, EDUCATION, PLACES, INTERESTS, PROFILE, AI_FLOW } from './cv.js?v=20261012135827';
+import { solid, toon, rng, PALETTE } from './toon.js?v=20261026105735';
+import { makeWater } from './effects.js?v=20261026105735';
+import { person } from './characters.js?v=20261026105735';
+import { buildCafe } from './cafe.js?v=20261026105735';
+import { buildMatchRace } from './matchrace.js?v=20261026105735';
+import { buildPhare } from './phare.js?v=20261026105735';
+import { Boat } from './boat.js?v=20261026105735';
+import { buildDecor } from './decor.js?v=20261026105735';
+import { buildTown } from './town.js?v=20261026105735';
+import { buildIsland, insidePoly, nearestOnPoly } from './island.js?v=20261026105735';
+import { buildIslandLife } from './islandlife.js?v=20261026105735';
+import { buildIslandCharm } from './islandcharm.js?v=20261026105735';
+import { loadLRBase } from './lrbase.js?v=20261026105735';
+import { EXPERIENCES, EDUCATION, PLACES, INTERESTS, PROFILE, AI_FLOW } from './cv.js?v=20261026105735';
 
 // Plan du monde (le vent vient du nord, -z) :
 //   départ + nom flottant au centre, chenal du parcours vers l'est,
@@ -753,17 +755,18 @@ export function buildWorld(scene) {
     {
       const kc = EXPERIENCES[kcIndex];
       const b = new THREE.Group();
-      b.position.set(470, qTop, -290);
-      b.add(solid(new THREE.BoxGeometry(26, 11, 12).translate(0, 5.5, 0), '#14275b', { outlineWidth: 0.18 }));
-      b.add(solid(new THREE.BoxGeometry(26.4, 3, 12.4).translate(0, 6.5, 0), '#4aa3df', { outlineWidth: 0.1 }));
-      b.add(solid(new THREE.BoxGeometry(27, 0.8, 13).translate(0, 11.4, 0), '#e8404a', { outlineWidth: 0.1 }));
-      b.add(solid(new THREE.BoxGeometry(9, 7, 0.5).translate(0, 3.5, 6.2), '#f6f1e7', { outlineWidth: 0.08 }));
+      // La base : celle de La Roche-Posay Racing Team à Bagnoli, reprise de mon monde Pajusco World (src/lrbase.js).
+      // Chargée après coup : ses coordonnées sont donc déjà les finales (le port a été déplacé entre-temps).
+      loadLRBase(root, { at: { x: 496.4 + HARBOUR_SHIFT.x, z: -268.5 + HARBOUR_SHIFT.z }, top: qTop, scale: 0.68 })
+        .catch((e) => console.warn('base LRPRT non chargee', e));
+      b.position.set(512, qTop, -292);
       const sign = new THREE.Sprite(new THREE.SpriteMaterial({ map: badgeTexture(kc), depthWrite: false }));
       sign.scale.setScalar(8);
-      sign.position.y = 17;
+      sign.position.y = 21;
       b.add(sign);
       root.add(b);
-      blocks.boxes.push({ x: 470, z: -290, hx: 13.5, hz: 6.5 });
+      blocks.boxes.push({ x: 512, z: -290.6, hx: 9, hz: 14.5 }); // le Shed
+      blocks.boxes.push({ x: 488, z: -278.1, hx: 4.4, hz: 2.7 }); // l'hospitality vitrée
       const moored = new Boat();
       moored.pos.set(525, -240);
       moored.heading = -Math.PI / 2;
@@ -771,28 +774,7 @@ export function buildWorld(scene) {
       moored.root.position.y = -0.2;
       root.add(moored.root);
       circles.push({ x: 525, z: -240, r: 7 });
-      // À terre, à droite du bâtiment : un AC40 et un AC75 démâtés, sur leurs bers, foils relevés.
-      const parked = (px, pz, k) => {
-        const boat = new Boat({ rig: false });
-        boat.armPort.rotation.z = 1.95;
-        boat.armStbd.rotation.z = -1.95;
-        boat.root.scale.setScalar(k);
-        boat.root.position.set(px, qTop + 2.2 * k, pz); // assez haut pour que le safran ne touche pas le sol
-        boat.root.rotation.y = Math.PI / 2;
-        root.add(boat.root);
-        // Le ber : deux berceaux et leurs longerons, sous la coque.
-        const cradle = new THREE.Group();
-        cradle.position.set(px, qTop, pz);
-        for (const dx of [-3.2, 3.2]) {
-          cradle.add(solid(new THREE.BoxGeometry(0.5 * k, 2.3 * k, 2.6 * k).translate(dx * k, 1.15 * k, 0), '#55607a', { outlineWidth: 0.05 }));
-          cradle.add(solid(new THREE.BoxGeometry(0.7 * k, 0.3 * k, 3.4 * k).translate(dx * k, 0.15 * k, 0), '#3c4a5c', { outlineWidth: 0.04 }));
-        }
-        for (const dz of [-1.1, 1.1]) cradle.add(solid(new THREE.BoxGeometry(7.4 * k, 0.3 * k, 0.3 * k).translate(0, 0.3 * k, dz * k), '#3c4a5c', { outlineWidth: 0.03 }));
-        root.add(cradle);
-        blocks.boxes.push({ x: px, z: pz, hx: 6.6 * k, hz: 2 * k });
-      };
-      parked(495, -287, 1);    // AC40
-      parked(518, -287, 1.9);  // AC75
+      // L'AC75 est sur son ber, dans la base cuite.
       labels.push({ pos: new THREE.Vector3(470, qTop + 24, -290), html: `<i>Emploi actuel</i>${kc.org}`, cls: 'label-buoy k-job', zone: 'kc', hideInZone: true });
       labels.push({ pos: new THREE.Vector3(496, qTop + 36, -292), html: 'Emploi', cls: 'label-region label-cat' });
       zones.push({
@@ -906,6 +888,7 @@ export function buildWorld(scene) {
     // La vie de l'île : plage, parc, supermarché, immeubles, tour, entrepôts, arbres.
     const life = buildIslandLife({ root, anim, blocks, circles, poly: portIsland.poly, top: qTop, S, hills: land.hills });
     map.roads.push(...life.roads);
+    buildIslandCharm({ root, anim, blocks, circles, poly: portIsland.poly, top: qTop, S, life });
     // Course à pied : la piste autour du parc ; sa fiche s'ouvre à l'est, en face de la musculation.
     {
       const P = life.park, rx = P.x + P.rx + 7;

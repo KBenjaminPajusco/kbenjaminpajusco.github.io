@@ -1,14 +1,15 @@
 import * as THREE from 'three';
-import { solid, toon, rng, PALETTE } from './toon.js?v=20261012135827';
-import { person } from './characters.js?v=20261012135827';
-import { keelboat } from './matchrace.js?v=20261012135827';
-import { lampPost } from './island.js?v=20261012135827';
+import { solid, toon, rng, PALETTE } from './toon.js?v=20261026105735';
+import { person } from './characters.js?v=20261026105735';
+import { keelboat } from './matchrace.js?v=20261026105735';
+import { lampPost } from './island.js?v=20261026105735';
 
 // La ville du port : vieille ville à rue sinueuse avec voitures, promenade avec passants,
 // capitainerie, et une marina (pontons, places, bateaux amarrés) dans le bassin.
 // Coordonnées dans le repère de construction du port : tout est rangé dans un groupe déplacé avec lui.
 
-const HOUSE_COLORS = ['#f6efe2', '#f2d7b6', '#e7eef4', '#f4dcd6', '#e9f0dc'];
+const HOUSE_COLORS = ['#f6efe2', '#f2d7b6', '#e7eef4', '#f4dcd6', '#e9f0dc', '#f5d36b', '#e8a58c', '#b7d9d0', '#f0b6c4'];
+const DET = rng(4242); // détails de façade : tirage à part pour ne pas déplacer les maisons
 const ROOF_COLORS = ['#c8553d', '#55657a', '#a8483a', '#3c4a5c'];
 const CAR_COLORS = ['#ff6a4d', '#4d7cff', '#ffc845', '#2f9e55', '#f6f1e7', '#a25dd9'];
 
@@ -49,6 +50,33 @@ function house(R) {
     const wx = s * w / 3.2, wy = h * 0.62;
     g.add(solid(new THREE.BoxGeometry(1.2, 1.2, 0.2).translate(wx, wy, d / 2 + 0.05), '#4aa4de', { outlineWidth: 0 })); // WINDOW_COLOR : s'allume la nuit
     for (const t of [-1, 1]) g.add(solid(new THREE.BoxGeometry(0.55, 1.3, 0.12).translate(wx + t * 0.9, wy, d / 2 + 0.12), sh, { outlineWidth: 0 }));
+  }
+  // Détails : jardinières fleuries, linge qui sèche, auvent rayé, pots à la porte.
+  const FLW = ['#e8404a', '#ffc845', '#ffffff', '#ff8fb3', '#a25dd9'];
+  const zf = d / 2;
+  for (const s of [-1, 1]) {
+    const wx = s * w / 3.2, wy = h * 0.62;
+    if (DET() < 0.75) {
+      g.add(solid(new THREE.BoxGeometry(1.7, 0.3, 0.45).translate(wx, wy - 0.85, zf + 0.3), PALETTE.wood, { outlineWidth: 0 }));
+      g.add(solid(new THREE.BoxGeometry(1.55, 0.25, 0.4).translate(wx, wy - 0.62, zf + 0.3), '#4f8f4a', { outlineWidth: 0 }));
+      for (let k = 0; k < 3; k++) g.add(solid(new THREE.IcosahedronGeometry(0.2, 0).translate(wx - 0.5 + k * 0.5, wy - 0.45, zf + 0.32), FLW[Math.floor(DET() * FLW.length)], { outlineWidth: 0 }));
+    }
+  }
+  if (DET() < 0.45 && h * 0.62 + 1.3 < h - 0.2) {
+    const ly = h * 0.62 + 1.25, lx = w / 3.2;
+    g.add(solid(new THREE.BoxGeometry(lx * 2, 0.04, 0.04).translate(0, ly, zf + 0.55), '#1d2533', { outlineWidth: 0 }));
+    for (const s of [-1, 1]) g.add(solid(new THREE.BoxGeometry(0.05, 0.05, 0.55).translate(s * lx, ly, zf + 0.27), '#1d2533', { outlineWidth: 0 }));
+    for (let k = 0; k < 4; k++) g.add(solid(new THREE.BoxGeometry(0.45, 0.7, 0.03).translate(-lx + 0.6 + k * ((lx * 2 - 1.2) / 3), ly - 0.38, zf + 0.55), FLW[Math.floor(DET() * FLW.length)], { outlineWidth: 0 }));
+  }
+  if (DET() < 0.45) {
+    const [c1, c2] = [['#e8404a', '#ffffff'], ['#2f6fe0', '#ffffff'], ['#2f9e55', '#ffffff']][Math.floor(DET() * 3)];
+    for (let k = 0; k < 4; k++) g.add(solid(new THREE.BoxGeometry(0.65, 0.12, 1.3).rotateX(0.4).translate(-0.975 + k * 0.65, 2.75, zf + 0.75), k % 2 ? c2 : c1, { outlineWidth: 0 }));
+  }
+  for (const s of [-1, 1]) {
+    if (DET() < 0.6) {
+      g.add(solid(new THREE.CylinderGeometry(0.3, 0.22, 0.5, 6).translate(s * 1.5, 0.25, zf + 0.5), '#c8553d', { outlineWidth: 0 }));
+      g.add(solid(new THREE.IcosahedronGeometry(0.42, 0).translate(s * 1.5, 0.8, zf + 0.5), '#4f8f4a', { outlineWidth: 0 }));
+    }
   }
   return { g, w, d };
 }
@@ -144,7 +172,7 @@ export function buildTown({ root, anim, labels, circles, blocks, land, qTop, S }
   const tryHouse = (x, z, face) => {
     if (x < 203 || x > 292 || z < -433 || z > -286) return;
     if (distToStreet(x, z) < 8.5) return;
-    if (Math.hypot(x - 249, z - 360) < 15) return; // la place reste dégagée
+    if (Math.hypot(x - 249, z + 360) < 17) return; // la place reste dégagée
     if (placed.some((q) => Math.hypot(q.x - x, q.z - z) < 10.5)) return;
     const { g, w, d } = house(R);
     g.scale.setScalar(0.85 + R() * 0.25);

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { solid, toon as toonMat, rng, PALETTE } from './toon.js?v=20261012135827';
-import { person } from './characters.js?v=20261012135827';
-import { insidePoly, nearestOnPoly, lampPost } from './island.js?v=20261012135827';
+import { solid, toon as toonMat, rng, PALETTE } from './toon.js?v=20261026105735';
+import { person } from './characters.js?v=20261026105735';
+import { insidePoly, nearestOnPoly, lampPost } from './island.js?v=20261026105735';
 
 
 // La vie de l'île : plage et vagues, parc, arbres, immeubles, tour, entrepôts, supermarché et son parking.
@@ -558,5 +558,5 @@ export function buildIslandLife({ root, anim, blocks, circles, poly, top, S, hil
     blocks.circles.push({ x, z, r: 1.3 });
     planted++;
   }
-  return { roads: roadLines, park, climb: CLIMB, code: CODE, mod: MOD };
+  return { roads: roadLines, park, climb: CLIMB, code: CODE, mod: MOD, free };
 }
